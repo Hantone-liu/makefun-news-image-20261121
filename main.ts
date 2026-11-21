@@ -13,7 +13,7 @@
 // Outside the grader's container, MAKEFUN_OUTPUT_DIR stands in for /output:
 //   mkdir -p out && MAKEFUN_OUTPUT_DIR=out node main.ts
 
-import { copyFileSync, readFileSync, statSync } from 'node:fs';
+import { copyFileSync, mkdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 
 const src = new URL('./entry.png', import.meta.url);
@@ -33,6 +33,10 @@ const isJpeg = head[0] === 0xff && head[1] === 0xd8 && head[2] === 0xff;
 if (!isPng && !isJpeg) {
   throw new Error('entry.png is neither a PNG nor a JPEG (bad magic bytes)');
 }
+
+// The grader hands us a writable /output, but make the directory anyway
+// so a missing output folder cannot fail the copy.
+mkdirSync(outDir, { recursive: true });
 
 copyFileSync(src, dst);
 const copied = readFileSync(dst);
